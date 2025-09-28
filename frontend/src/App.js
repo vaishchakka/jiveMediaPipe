@@ -17,13 +17,11 @@ function App() {
 
   // Handle pose detection from LiveDance component
   const handlePoseDetected = useCallback((poseData) => {
-    console.log('🎯 App received pose data:', poseData);
     setCurrentPoseData(poseData);
   }, []);
 
   // Handle video end - trigger game ending
   const handleVideoEnd = useCallback(() => {
-    console.log('🎬 Video ended - game ending triggered');
     setIsGameEnded(true);
     setIsGameStarted(false);
   }, []);
@@ -41,16 +39,13 @@ function App() {
   };
 
   const startGame = () => {
-    console.log('🎮 Start game clicked, current countdown:', gameStartCountdown);
     if (gameStartCountdown === null) {
-      console.log('🎮 Starting countdown...');
       setGameStartCountdown(5);
     }
   };
 
   // Simple reset function - no countdown needed
   const resetGame = () => {
-    console.log('🔄 Resetting game...');
     setIsGameStarted(false);
     setIsPaused(false);
     setGameStartCountdown(null);
@@ -60,7 +55,6 @@ function App() {
 
   // Handle play again
   const handlePlayAgain = () => {
-    console.log('🎮 Playing again...');
     setIsGameEnded(false);
     setFinalScore(0);
     setGameStartCountdown(5);
@@ -69,13 +63,11 @@ function App() {
   // Countdown effect for game start
   useEffect(() => {
     if (gameStartCountdown > 0) {
-      console.log(`🎮 Game countdown: ${gameStartCountdown}`);
       const timer = setTimeout(() => {
         setGameStartCountdown(gameStartCountdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
     } else if (gameStartCountdown === 0) {
-      console.log('🎮 Countdown finished - starting game!');
       // Show "GO!" for a moment before starting the game
       setTimeout(() => {
         setIsGameStarted(true);
