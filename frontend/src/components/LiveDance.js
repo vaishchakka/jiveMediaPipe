@@ -33,12 +33,9 @@ const LiveDance = ({ isGameStarted, isPaused, onPoseDetected }) => {
       timestamp: Date.now()
     };
     
-    console.log(`🎯 Live pose detected: ${landmarks.length} landmarks`);
-    console.log('🎯 Pose data sample:', poseData.kp.slice(0, 3)); // Show first 3 landmarks
-    
     // Send pose data for scoring if callback provided
     if (onPoseDetected) {
-      console.log('🎯 Sending pose data to parent component');
+      console.log(`🎯 Sending pose data: ${landmarks.length} landmarks`);
       onPoseDetected(poseData);
     } else {
       console.log('❌ No onPoseDetected callback provided');
@@ -87,8 +84,6 @@ const LiveDance = ({ isGameStarted, isPaused, onPoseDetected }) => {
     try {
       setError(null);
       console.log('🎯 Starting camera with MediaPipe...');
-      console.log('🎯 MediaPipe Pose available:', typeof Pose !== 'undefined');
-      console.log('🎯 MediaPipe Camera available:', typeof Camera !== 'undefined');
       
       // Check if MediaPipe is available
       if (typeof Pose === 'undefined' || typeof Camera === 'undefined') {
@@ -126,7 +121,6 @@ const LiveDance = ({ isGameStarted, isPaused, onPoseDetected }) => {
       
       setIsStreaming(true);
       setPoseStatus('Webcam Active - Pose Detection Ready');
-      console.log('✅ Camera started successfully!');
       
     } catch (err) {
       setError(`Camera error: ${err.message}`);

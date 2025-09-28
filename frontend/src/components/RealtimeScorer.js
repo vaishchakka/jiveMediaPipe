@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './RealtimeScorer.css';
 
@@ -9,41 +9,58 @@ const RealtimeScorer = ({ isGameStarted, poseData, onScoreUpdate }) => {
   const [showPointGain, setShowPointGain] = useState(false);
   const [accuracy, setAccuracy] = useState(0);
   const [frameCount, setFrameCount] = useState(0);
-  const [gameStartTime, setGameStartTime] = useState(null);
+  
+  // Use refs to avoid dependency issues
   const totalScoreRef = useRef(0);
+  const intervalRef = useRef(null);
+  const poseDataRef = useRef(null);
+  const isGameStartedRef = useRef(false);
 
-  // Send pose data to backend for scoring every 0.5 seconds
-  const sendPoseForScoring = useCallback(async (poseData) => {
-    if (!isGameStarted || !poseData) {
-      console.log('❌ Not sending pose - game not started or no pose data:', { isGameStarted, hasPoseData: !!poseData });
+  // Update refs when props change
+  useEffect(() => {
+    poseDataRef.current = poseData;
+    isGameStartedRef.current = isGameStarted;
+  }, [poseData, isGameStarted]);
+
+  // Send pose data to backend for scoring
+  const sendPoseForScoring = async () => {
+    const currentPoseData = poseDataRef.current;
+    const currentGameStarted = isGameStartedRef.current;
+    
+    if (!currentGameStarted || !currentPoseData) {
       return;
     }
 
-    console.log(`📊 Sending pose for scoring: ${poseData.kp.length} landmarks`);
+    console.log(`📊 Sending pose for scoring: ${currentPoseData.kp.length} landmarks`);
 
     try {
       const response = await axios.post('http://localhost:5000/api/compare-pose', {
-        live_pose: poseData
+        live_pose: currentPoseData
       });
-
-      console.log('🎯 API Response:', response.data);
       const { points_earned, similarity, message } = response.data;
+      
+      console.log('🎯 API Response:', response.data);
       
       // Update scores
       setCurrentPoints(points_earned);
       const newTotalScore = totalScoreRef.current + points_earned;
       totalScoreRef.current = newTotalScore;
       setTotalScore(newTotalScore);
-      setFrameCount(prev => prev + 1);
+      
+      console.log(`🎯 Score updated: ${points_earned} points, Total: ${newTotalScore}`);
+      
+      // Update frame count and calculate accuracy
+      setFrameCount(prev => {
+        const newFrameCount = prev + 1;
+        const newAccuracy = newFrameCount > 0 ? newTotalScore / newFrameCount : points_earned;
+        setAccuracy(Math.round(newAccuracy));
+        return newFrameCount;
+      });
       
       // Update parent component with current total score
       if (onScoreUpdate) {
         onScoreUpdate(newTotalScore);
       }
-      
-      // Calculate accuracy
-      const newAccuracy = frameCount > 0 ? newTotalScore / (frameCount + 1) : points_earned;
-      setAccuracy(Math.round(newAccuracy));
       
       // Show point gain animation
       if (points_earned > 0) {
@@ -61,49 +78,54 @@ const RealtimeScorer = ({ isGameStarted, poseData, onScoreUpdate }) => {
     } catch (error) {
       console.error('❌ Error scoring pose:', error);
     }
-  }, [isGameStarted, onScoreUpdate]);
+  };
 
-  // Process pose data when it changes - use interval for continuous scoring
+  // Start/stop scoring interval based on game state
   useEffect(() => {
-    console.log('🔄 RealtimeScorer useEffect triggered:', { poseData: !!poseData, isGameStarted });
-    
-    if (poseData && isGameStarted) {
+    if (isGameStarted) {
       console.log('🎯 Starting scoring interval...');
-      // Send pose for scoring every 0.5 seconds
-      const interval = setInterval(() => {
-        sendPoseForScoring(poseData);
+      // Clear any existing interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      // Start new interval - score every 0.5 seconds
+      intervalRef.current = setInterval(() => {
+        sendPoseForScoring();
       }, 500);
-
-      return () => {
-        console.log('🛑 Clearing scoring interval');
-        clearInterval(interval);
-      };
-    }
-  }, [poseData, isGameStarted, sendPoseForScoring]);
-
-  // Reset scores when game resets
-  useEffect(() => {
-    if (!isGameStarted) {
+    } else {
+      console.log('🛑 Stopping scoring interval...');
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
+      // Reset scores when game stops
       setTotalScore(0);
       setCurrentPoints(0);
       setPointGain(null);
       setShowPointGain(false);
       setAccuracy(0);
       setFrameCount(0);
+      totalScoreRef.current = 0;
     }
-  }, [isGameStarted]);
 
+    // Cleanup on unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isGameStarted, onScoreUpdate]);
+
+  console.log('🎯 RealtimeScorer render:', { totalScore, currentPoints, accuracy });
+  
   return (
     <div className="realtime-scorer">
       <div className="score-display">
         <div className="total-score">
           <div className="score-label">Total Score</div>
           <div className="score-value">{totalScore}</div>
-        </div>
-        <div className="debug-info">
-          <div>Game Started: {isGameStarted ? '✅' : '❌'}</div>
-          <div>Pose Data: {poseData ? `✅ (${poseData.kp.length} landmarks)` : '❌'}</div>
-          <div>Current Points: {currentPoints}</div>
         </div>
         
         <div className="current-score">
