@@ -90,25 +90,25 @@ def calculate_pose_similarity(ref_pose, live_pose):
     average_distance = total_distance / valid_points
     print(f"🔍 Average distance: {average_distance:.3f}, Valid points: {valid_points}")
     
-    # Much more lenient scoring
-    similarity = max(0, 100 - (average_distance * 20))
+    # More sensitive scoring - smaller distances = higher scores
+    # Distance of 0.1 = 90% similarity, 0.2 = 80%, 0.3 = 70%, etc.
+    similarity = max(0, 100 - (average_distance * 100))
     print(f"🎯 Similarity: {similarity:.1f}%")
     return min(100, similarity)
 
 def calculate_score(similarity):
     """Calculate score based on pose similarity."""
-    if similarity >= 90:
-        return 100  # Perfect
-    elif similarity >= 80:
-        return 80   # Great
-    elif similarity >= 70:
-        return 60   # Good
-    elif similarity >= 60:
-        return 40   # Fair
-    elif similarity >= 50:
-        return 20   # Poor
+    # More granular scoring - every 10% similarity = 10 points
+    # This makes scoring more sensitive to actual pose differences
+    base_score = int(similarity)
+    
+    # Bonus for very good poses
+    if similarity >= 95:
+        return base_score + 20  # Bonus for excellent poses
+    elif similarity >= 85:
+        return base_score + 10  # Bonus for good poses
     else:
-        return 0    # Miss
+        return base_score
 
 @app.route('/')
 def root():
@@ -207,6 +207,8 @@ def compare_pose():
         ref_pose = reference_poses[current_pose_index]
         current_pose_index = (current_pose_index + 1) % len(reference_poses)
         
+        print(f"🔍 Comparing with reference pose {current_pose_index-1}/{len(reference_poses)}")
+        
         # Calculate similarity and score
         similarity = calculate_pose_similarity(ref_pose, live_pose)
         score = calculate_score(similarity)
@@ -215,7 +217,7 @@ def compare_pose():
             "similarity": round(similarity, 2),
             "score": score,
             "points_earned": score,
-            "message": get_score_message(score)
+            "message": f"{score} points"
         })
         
     except Exception as e:

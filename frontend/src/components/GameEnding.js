@@ -15,22 +15,9 @@ const GameEnding = ({ finalScore, onPlayAgain, onReset }) => {
   }, []);
 
   const getScoreMessage = (score) => {
-    if (score >= 2000) return "INCREDIBLE! 🏆";
-    if (score >= 1500) return "AMAZING! 🌟";
-    if (score >= 1000) return "GREAT JOB! 🎉";
-    if (score >= 500) return "GOOD WORK! 👏";
-    if (score >= 100) return "NICE TRY! 💪";
-    return "KEEP PRACTICING! 💃";
+    return "Good Job! 🎉";
   };
 
-  const getScoreGrade = (score) => {
-    if (score >= 2000) return "S+";
-    if (score >= 1500) return "S";
-    if (score >= 1000) return "A";
-    if (score >= 500) return "B";
-    if (score >= 100) return "C";
-    return "D";
-  };
 
   return (
     <div className="game-ending-overlay">
@@ -44,7 +31,6 @@ const GameEnding = ({ finalScore, onPlayAgain, onReset }) => {
             <div className="final-score-section">
               <div className="score-label">FINAL SCORE</div>
               <div className="score-number">{finalScore}</div>
-              <div className="score-grade">GRADE: {getScoreGrade(finalScore)}</div>
             </div>
             
             <div className="score-message">
