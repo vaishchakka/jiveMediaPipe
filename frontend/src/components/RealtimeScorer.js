@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './RealtimeScorer.css';
 
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+
 const RealtimeScorer = ({ isGameStarted, poseData, onScoreUpdate }) => {
   const [totalScore, setTotalScore] = useState(0);
   const [currentPoints, setCurrentPoints] = useState(0);
@@ -34,8 +36,8 @@ const RealtimeScorer = ({ isGameStarted, poseData, onScoreUpdate }) => {
     console.log(`📊 Sending pose for scoring: ${currentPoseData.kp.length} landmarks`);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/compare-pose', {
-        live_pose: currentPoseData
+      const response = await axios.post(`${API_BASE}/api/compare-pose`, {
+        live_pose: poseData
       });
       const { points_earned, similarity, message } = response.data;
       
@@ -57,9 +59,9 @@ const RealtimeScorer = ({ isGameStarted, poseData, onScoreUpdate }) => {
         return newFrameCount;
       });
       
-      // Update parent component with current total score
+      // Update parent component with current total score, similarity, and current points
       if (onScoreUpdate) {
-        onScoreUpdate(newTotalScore);
+        onScoreUpdate(newTotalScore, similarity, points_earned);
       }
       
       // Show point gain animation

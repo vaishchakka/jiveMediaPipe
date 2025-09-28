@@ -6,9 +6,11 @@
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/pose": "^0.5.1675469404",
     "axios": "^1.12.2",
+    "cedar-os": "^0.1.23",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "zustand": "^4.4.0"
   },
   "scripts": {
     "start": "NODE_OPTIONS='--no-deprecation' react-scripts start",

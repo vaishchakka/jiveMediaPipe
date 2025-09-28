@@ -1,0 +1,14 @@
+Starting MediaPipe Pose API Server...
+Available endpoints:
+  GET  /api/poses     - Get pose landmarks data
+  GET  /api/angles    - Get joint angles data
+  GET  /api/video     - Get video file
+  GET  /api/status    - Get processing status
+  POST /api/process   - Process video
+
+Starting server on http://localhost:5000
+ * Serving Flask app 'api_server'
+ * Debug mode: on
+Address already in use
+Port 5000 is in use by another program. Either identify and stop that program, or start the server with a different port.
+On macOS, try disabling the 'AirPlay Receiver' service from System Preferences -> General -> AirDrop & Handoff.

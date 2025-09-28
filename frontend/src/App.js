@@ -3,7 +3,12 @@ import ReferenceVideo from './components/ReferenceVideo';
 import LiveDance from './components/LiveDance';
 import RealtimeScorer from './components/RealtimeScorer';
 import GameEnding from './components/GameEnding';
+import AIChatCoach from './components/AIChatCoach';
+import { initializeCedarStore } from './store/cedarStore';
+import axios from 'axios';
 import './App.css';
+
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
 
 function App() {
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -14,6 +19,37 @@ function App() {
   const [currentPoseData, setCurrentPoseData] = useState(null);
   const [isGameEnded, setIsGameEnded] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+  
+  // AI Coach state
+  const [aiCoachSessionId, setAiCoachSessionId] = useState(null);
+  const [currentSimilarity, setCurrentSimilarity] = useState(0);
+  const [currentScore, setCurrentScore] = useState(0);
+  const [aiCoachEnabled, setAiCoachEnabled] = useState(true);
+
+  // Initialize CedarOS and AI Coach
+  useEffect(() => {
+    initializeCedarStore();
+    startAiCoachSession();
+  }, []);
+
+  // AI Coach session management
+  const startAiCoachSession = async () => {
+    if (!aiCoachEnabled) return;
+    
+    try {
+      const response = await axios.post(`${API_BASE}/api/ai-coach/start-session`, {
+        skill_level: 'beginner',
+        feedback_style: 'encouraging'
+      });
+      
+      if (response.data.success) {
+        setAiCoachSessionId(response.data.session_id);
+        console.log('🤖 AI Coach session started:', response.data.session_id);
+      }
+    } catch (error) {
+      console.error('Error starting AI Coach session:', error);
+    }
+  };
 
   // Handle pose detection from LiveDance component
   const handlePoseDetected = useCallback((poseData) => {
@@ -61,6 +97,10 @@ function App() {
   const startGame = () => {
     if (gameStartCountdown === null) {
       setGameStartCountdown(5);
+      // Initialize AI Coach session for the new game
+      if (aiCoachEnabled && !aiCoachSessionId) {
+        startAiCoachSession();
+      }
     }
   };
 
@@ -71,6 +111,12 @@ function App() {
     setGameStartCountdown(null);
     setIsGameEnded(false);
     setFinalScore(0);
+    setCurrentSimilarity(0);
+    setCurrentScore(0);
+    // Start new AI Coach session
+    if (aiCoachEnabled) {
+      startAiCoachSession();
+    }
   };
 
   // Handle play again
@@ -180,10 +226,39 @@ function App() {
           <RealtimeScorer 
             isGameStarted={isGameStarted}
             poseData={currentPoseData}
-            onScoreUpdate={setFinalScore}
+            onScoreUpdate={(score, similarity, currentPoints) => {
+              setFinalScore(score);
+              setCurrentSimilarity(similarity || 0);
+              setCurrentScore(currentPoints || 0);
+            }}
           />
         )}
       </main>
+
+      {/* AI Coach Integration */}
+      {aiCoachEnabled && aiCoachSessionId && (
+        <AIChatCoach
+          currentPose={currentPoseData}
+          similarity={currentSimilarity}
+          score={currentScore}
+          gameActive={isGameStarted}
+        />
+      )}
+
+      {/* AI Coach Toggle */}
+      <div className="ai-coach-controls">
+        <button 
+          className={`ai-toggle ${aiCoachEnabled ? 'enabled' : 'disabled'}`}
+          onClick={() => {
+            setAiCoachEnabled(!aiCoachEnabled);
+            if (!aiCoachEnabled) {
+              startAiCoachSession();
+            }
+          }}
+        >
+          🤖 AI Coach {aiCoachEnabled ? 'ON' : 'OFF'}
+        </button>
+      </div>
 
       {isGameEnded && (
         <GameEnding 
