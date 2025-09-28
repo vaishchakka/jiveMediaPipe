@@ -1,0 +1,150 @@
+.realtime-scorer {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 50, 100, 0.9));
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 2px solid rgba(0, 255, 136, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.score-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.total-score, .current-score, .accuracy {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  flex: 1;
+}
+
+.score-label {
+  color: #ffffff;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.score-value {
+  color: #00ff88;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+  margin: 0;
+}
+
+.current-score .score-value {
+  color: #ffaa00;
+  text-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
+}
+
+.accuracy .score-value {
+  color: #00aaff;
+  text-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+}
+
+/* Point Gain Animation */
+.point-gain-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+  animation: pointGainPop 1s ease-out forwards;
+}
+
+.point-gain-text {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #00ff88;
+  text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+  text-align: center;
+  animation: pointGainGlow 1s ease-out;
+}
+
+@keyframes pointGainPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes pointGainGlow {
+  0% {
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+  }
+  50% {
+    text-shadow: 0 0 30px rgba(0, 255, 136, 1);
+  }
+  100% {
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+  }
+}
+
+.scoring-info {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.scoring-info p {
+  color: #ffffff;
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .realtime-scorer {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .score-display {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .total-score, .current-score, .accuracy {
+    padding: 0.8rem;
+  }
+  
+  .score-value {
+    font-size: 1.5rem;
+  }
+  
+  .point-gain-text {
+    font-size: 3rem;
+  }
+}
+
+.debug-info {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.debug-info div {
+  margin: 0.2rem 0;
+}

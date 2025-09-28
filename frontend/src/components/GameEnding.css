@@ -1,0 +1,233 @@
+.game-ending-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.game-ending-content {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 3rem;
+  text-align: center;
+  color: white;
+  max-width: 500px;
+  width: 90%;
+  animation: slideUp 0.6s ease-out;
+}
+
+.ending-header {
+  margin-bottom: 2rem;
+}
+
+.ending-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #00ff88;
+  text-shadow: 0 0 20px rgba(0, 255, 136, 0.7);
+  margin: 0;
+  animation: pulse 2s infinite;
+}
+
+.score-display {
+  margin: 2rem 0;
+  animation: scoreReveal 1s ease-out 0.5s both;
+}
+
+.final-score-section {
+  background: linear-gradient(135deg, rgba(0, 150, 255, 0.2), rgba(0, 255, 136, 0.2));
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid rgba(0, 255, 136, 0.3);
+}
+
+.score-label {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.score-number {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #00ff88;
+  text-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
+  margin: 0.5rem 0;
+  animation: scoreGlow 2s ease-in-out infinite alternate;
+}
+
+.score-grade {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffeb3b;
+  text-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+  margin-top: 0.5rem;
+}
+
+.score-message {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ff6b6b;
+  text-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
+  margin: 1rem 0;
+  animation: messageBounce 1s ease-out 1.5s both;
+}
+
+.ending-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  animation: fadeInUp 1s ease-out 2s both;
+}
+
+.play-again-button, .reset-button {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.play-again-button {
+  background: linear-gradient(135deg, #00ff88, #00cc6a);
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+}
+
+.play-again-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+  background: linear-gradient(135deg, #00cc6a, #00ff88);
+}
+
+.reset-button {
+  background: linear-gradient(135deg, #ff6b6b, #ff5252);
+  color: white;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.reset-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+  background: linear-gradient(135deg, #ff5252, #ff6b6b);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scoreReveal {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scoreGlow {
+  from {
+    text-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
+  }
+  to {
+    text-shadow: 0 0 50px rgba(0, 255, 136, 1), 0 0 80px rgba(0, 255, 136, 0.5);
+  }
+}
+
+@keyframes messageBounce {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .game-ending-content {
+    padding: 2rem;
+    margin: 1rem;
+  }
+
+  .ending-title {
+    font-size: 2rem;
+  }
+
+  .score-number {
+    font-size: 3rem;
+  }
+
+  .score-message {
+    font-size: 1.5rem;
+  }
+
+  .ending-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .play-again-button, .reset-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
