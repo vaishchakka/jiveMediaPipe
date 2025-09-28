@@ -3,3 +3,4 @@ __pycache__/
 out/*.mp4
 out/*.jsonl
 out/*.csv
+frontend/node_modules/
