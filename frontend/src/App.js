@@ -26,11 +26,31 @@ function App() {
     setIsGameStarted(false);
   }, []);
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       setUploadedFile(file);
       setIsProcessing(true);
+      
+      // Auto-detect video type based on filename
+      const fileName = file.name.toLowerCase();
+      let videoType = 'dance'; // default
+      
+      if (fileName.includes('dancevideo') || fileName.includes('dance_video')) {
+        videoType = 'dancevideo';
+      }
+      
+      // Switch to the appropriate video
+      try {
+        const response = await fetch(`http://localhost:5000/api/switch-video/${videoType}`);
+        const data = await response.json();
+        if (data.success) {
+          console.log(`🎬 Auto-switched to video: ${videoType}`);
+        }
+      } catch (error) {
+        console.error('Error switching video:', error);
+      }
+      
       // Simulate processing
       setTimeout(() => {
         setIsProcessing(false);
@@ -59,6 +79,7 @@ function App() {
     setFinalScore(0);
     setGameStartCountdown(5);
   };
+
 
   // Countdown effect for game start
   useEffect(() => {
@@ -110,6 +131,7 @@ function App() {
           </div>
         )}
       </div>
+
 
       <div className="game-controls">
         <button 
