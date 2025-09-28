@@ -104,7 +104,7 @@ function App() {
       <header className="app-header">
         <div className="title-section">
           <span className="title-icon">🎵</span>
-          <h1 className="app-title">Just Dance Clone</h1>
+            <h1 className="app-title">Welcome to Jive</h1>
           <span className="title-icon">💃</span>
         </div>
         <p className="app-subtitle">

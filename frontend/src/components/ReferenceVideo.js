@@ -68,9 +68,7 @@ const ReferenceVideo = ({ isGameStarted, isPaused, onVideoEnd }) => {
       </div>
       
       <div className="video-info">
-        <p>🎯 Follow the movements shown in this video</p>
-        <p>💃 Dance along with the reference video!</p>
-        <p>📹 Video Status: {poseStatus}</p>
+        {/* Removed instructional/status texts as requested */}
       </div>
     </div>
   );

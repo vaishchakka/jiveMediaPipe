@@ -191,9 +191,7 @@ const LiveDance = ({ isGameStarted, isPaused, onPoseDetected }) => {
       )}
       
       <div className="video-info">
-        <p>🎥 Camera starts automatically when you begin the game</p>
-        <p>💃 Dance along with the reference video!</p>
-        <p>🎯 Real-time pose detection with MediaPipe</p>
+        {/* Removed instructional/status texts as requested */}
       </div>
     </div>
   );
