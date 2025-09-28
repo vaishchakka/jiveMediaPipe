@@ -51,11 +51,11 @@ const ReferenceVideo = ({ isGameStarted, isPaused, onVideoEnd }) => {
                   ref={videoRef}
                   src="/api/video"
                   className="reference-video-element"
-                  muted
                   onLoadedData={handleVideoLoad}
                   onError={handleVideoError}
                   onEnded={handleVideoEnd}
                   controls
+                  preload="metadata"
                 />
         
         {/* Pose overlay canvas will be handled by the backend overlay video */}

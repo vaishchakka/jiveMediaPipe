@@ -16,25 +16,36 @@ CORS(app)  # Enable CORS for React frontend
 
 # Paths to data files
 POSES_JSONL = "out/poses.jsonl"
+POSES_JSONL_2 = "out/poses_dancevideo_real.jsonl"
 ANGLES_CSV = "out/angles.csv"
 OVERLAY_VIDEO = "out/overlay.mp4"
+OVERLAY_VIDEO_2 = "out/overlay_dancevideo_real.mp4"
 ORIGINAL_VIDEO = "videos/dance.mov"
+NEW_VIDEO = "videos/dancevideo.mp4"
 
 # Global variables for pose comparison
 reference_poses = []
 current_pose_index = 0
+current_video = "dance"  # "dance" or "dancevideo"
 
 def load_reference_poses():
     """Load reference poses from JSONL file."""
-    global reference_poses
-    if not os.path.exists(POSES_JSONL):
+    global reference_poses, current_video
+    
+    # Choose the correct pose file based on current video
+    poses_file = POSES_JSONL if current_video == "dance" else POSES_JSONL_2
+    
+    if not os.path.exists(poses_file):
+        print(f"❌ Pose file not found: {poses_file}")
         return False
     
     try:
-        with open(POSES_JSONL, 'r') as f:
+        reference_poses = []  # Clear existing poses
+        with open(poses_file, 'r') as f:
             for line in f:
                 if line.strip():
                     reference_poses.append(json.loads(line))
+        print(f"✅ Loaded {len(reference_poses)} poses from {poses_file}")
         return True
     except Exception as e:
         print(f"Error loading reference poses: {e}")
@@ -162,24 +173,82 @@ def get_angles():
 
 @app.route('/api/video')
 def get_video():
-    """Serve the original user video."""
-    if os.path.exists(ORIGINAL_VIDEO):
-        response = send_file(ORIGINAL_VIDEO)
+    """Serve the current video."""
+    global current_video
+    
+    # Choose video based on current selection
+    video_path = ORIGINAL_VIDEO if current_video == "dance" else NEW_VIDEO
+    
+    if os.path.exists(video_path):
+        response = send_file(video_path)
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Headers'] = 'Range'
         response.headers['Accept-Ranges'] = 'bytes'
+        response.headers['Content-Type'] = 'video/mp4'
         return response
     else:
         return jsonify({"error": "No video found"}), 404
+
+@app.route('/api/overlay')
+def get_overlay():
+    """Serve the current overlay video."""
+    global current_video
+    
+    # Choose overlay based on current selection
+    overlay_path = OVERLAY_VIDEO if current_video == "dance" else OVERLAY_VIDEO_2
+    
+    if os.path.exists(overlay_path):
+        response = send_file(overlay_path)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Range'
+        response.headers['Accept-Ranges'] = 'bytes'
+        response.headers['Content-Type'] = 'video/mp4'
+        return response
+    else:
+        return jsonify({"error": "No overlay found"}), 404
+
+@app.route('/api/switch-video/<video_name>')
+def switch_video(video_name):
+    """Switch between different videos."""
+    global current_video, reference_poses, current_pose_index
+    
+    if video_name in ["dance", "dancevideo"]:
+        current_video = video_name
+        reference_poses = []  # Clear current poses
+        current_pose_index = 0
+        
+        # Load new poses
+        if load_reference_poses():
+            return jsonify({
+                "success": True,
+                "current_video": current_video,
+                "poses_loaded": len(reference_poses)
+            })
+        else:
+            return jsonify({"error": "Failed to load poses for video"}), 500
+    else:
+        return jsonify({"error": "Invalid video name"}), 400
+
+@app.route('/api/current-video')
+def get_current_video():
+    """Get current video information."""
+    return jsonify({
+        "current_video": current_video,
+        "poses_loaded": len(reference_poses)
+    })
 
 @app.route('/api/status')
 def get_status():
     """Get processing status."""
     status = {
         "poses_available": os.path.exists(POSES_JSONL),
+        "poses_available_2": os.path.exists(POSES_JSONL_2),
         "angles_available": os.path.exists(ANGLES_CSV),
+        "original_video": os.path.exists(ORIGINAL_VIDEO),
+        "new_video": os.path.exists(NEW_VIDEO),
         "overlay_available": os.path.exists(OVERLAY_VIDEO),
-        "original_video": os.path.exists(ORIGINAL_VIDEO)
+        "overlay_available_2": os.path.exists(OVERLAY_VIDEO_2),
+        "current_video": current_video
     }
     return jsonify(status)
 
