@@ -56,7 +56,7 @@ python src/extract_pose.py --video videos/dance.mov --overlay out/overlay.mp4 --
 python src/extract_pose.py --video videos/dance.mov --jsonl out/poses.jsonl --csv out/angles.csv
 ```
 
-#### Compare Angle Timelines
+#### Compare Angle Timeline
 
 ```bash
 # Compare two angle CSV files
