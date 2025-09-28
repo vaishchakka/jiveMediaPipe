@@ -14,14 +14,18 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
 
-# Paths to data files
-POSES_JSONL = "out/poses.jsonl"
-POSES_JSONL_2 = "out/poses_dancevideo_real.jsonl"
-ANGLES_CSV = "out/angles.csv"
-OVERLAY_VIDEO = "out/overlay.mp4"
-OVERLAY_VIDEO_2 = "out/overlay_dancevideo_real.mp4"
-ORIGINAL_VIDEO = "videos/dance.mov"
-NEW_VIDEO = "videos/dancevideo.mp4"
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Paths to data files (using absolute paths)
+POSES_JSONL = os.path.join(SCRIPT_DIR, "output", "poses_dance.jsonl")
+POSES_JSONL_2 = os.path.join(SCRIPT_DIR, "output", "poses_dancevideo.jsonl")
+ANGLES_CSV = os.path.join(SCRIPT_DIR, "output", "angles.csv")
+OVERLAY_VIDEO = os.path.join(SCRIPT_DIR, "output", "overlay_dance.mp4")
+OVERLAY_VIDEO_2 = os.path.join(SCRIPT_DIR, "output", "overlay_dancevideo.mp4")
+ORIGINAL_VIDEO = os.path.join(SCRIPT_DIR, "videos", "dance.mov")
+NEW_VIDEO = os.path.join(SCRIPT_DIR, "videos", "dancevideo.mp4")
+
 
 # Global variables for pose comparison
 reference_poses = []
@@ -44,21 +48,46 @@ def load_reference_poses():
         with open(poses_file, 'r') as f:
             for line in f:
                 if line.strip():
-                    reference_poses.append(json.loads(line))
+                    pose_data = json.loads(line)
+                    # Normalize the data format - ensure we have 'kp' field
+                    if 'landmarks' in pose_data and 'kp' not in pose_data:
+                        # Convert landmarks to kp format
+                        landmarks = pose_data['landmarks']
+                        if landmarks and isinstance(landmarks[0], dict):
+                            pose_data['kp'] = [[lm['x'], lm['y'], lm['z'], lm['visibility']] for lm in landmarks]
+                        else:
+                            pose_data['kp'] = landmarks
+                    elif 'kp' not in pose_data:
+                        print(f"⚠️ No 'kp' or 'landmarks' field found in pose data")
+                        continue
+                    reference_poses.append(pose_data)
         print(f"✅ Loaded {len(reference_poses)} poses from {poses_file}")
         return True
     except Exception as e:
         print(f"Error loading reference poses: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def calculate_pose_similarity(ref_pose, live_pose):
     """Calculate similarity between reference and live poses."""
-    if not ref_pose or not live_pose or not ref_pose.get('kp') or not live_pose.get('kp'):
+    if not ref_pose or not live_pose:
         print("❌ Missing pose data")
         return 0
     
-    ref_landmarks = ref_pose['kp']
-    live_landmarks = live_pose['kp']
+    # Handle different data formats - some files use 'landmarks', others use 'kp'
+    ref_landmarks = ref_pose.get('kp') or ref_pose.get('landmarks', [])
+    live_landmarks = live_pose.get('kp') or live_pose.get('landmarks', [])
+    
+    if not ref_landmarks or not live_landmarks:
+        print("❌ Missing landmark data")
+        return 0
+    
+    # Convert landmarks format if needed (from objects to arrays)
+    if ref_landmarks and isinstance(ref_landmarks[0], dict):
+        ref_landmarks = [[lm['x'], lm['y'], lm['z'], lm['visibility']] for lm in ref_landmarks]
+    if live_landmarks and isinstance(live_landmarks[0], dict):
+        live_landmarks = [[lm['x'], lm['y'], lm['z'], lm['visibility']] for lm in live_landmarks]
     
     # Handle landmark count mismatch by using the minimum length
     min_length = min(len(ref_landmarks), len(live_landmarks))
@@ -248,7 +277,8 @@ def get_status():
         "new_video": os.path.exists(NEW_VIDEO),
         "overlay_available": os.path.exists(OVERLAY_VIDEO),
         "overlay_available_2": os.path.exists(OVERLAY_VIDEO_2),
-        "current_video": current_video
+        "current_video": current_video,
+        "poses_loaded": len(reference_poses)
     }
     return jsonify(status)
 
@@ -342,6 +372,14 @@ if __name__ == '__main__':
     print("  GET  /api/video     - Get video file")
     print("  GET  /api/status    - Get processing status")
     print("  POST /api/process   - Process video")
+    print("\nLoading reference poses...")
+    
+    # Load initial reference poses
+    if load_reference_poses():
+        print("✅ Initial poses loaded successfully")
+    else:
+        print("⚠️ No initial poses loaded - will load on first request")
+    
     print("\nStarting server on http://localhost:5000")
     
     app.run(debug=True, host='0.0.0.0', port=5000)
